@@ -7,6 +7,7 @@ const actionTemplates = {
   "Technical Problem": "Suggest user to restart their browser.",
   "General Inquiry": "Respond with FAQ link.",
   "Feature Request": "Ask user to check billing portal.",
+  "Human Review": "Route to support agent for manual review.",
   "Unknown": "Review manually."
 }
 

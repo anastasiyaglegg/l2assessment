@@ -159,7 +159,7 @@ function getMockCategorization(message) {
   
   // Fallback for ambiguous messages
   return {
-    category: "General Inquiry",
+    category: "Human Review",
     reasoning: getRandomReasoning('ambiguous')
   };
 }
