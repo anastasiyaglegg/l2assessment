@@ -1,13 +1,22 @@
 /**
  * Recommendation Templates - Maps categories to recommended actions
  */
+import { isSpanishMessage } from './language.js'
 
 const actionTemplates = {
-  "Billing Issue": "Ask user to check billing portal.",
-  "Technical Problem": "Suggest user to restart their browser.",
-  "General Inquiry": "Respond with FAQ link.",
-  "Feature Request": "Ask user to check billing portal.",
-  "Unknown": "Review manually."
+  "Billing Issue": "Review the affected invoice or payment and confirm the account status.",
+  "Technical Problem": "Reproduce the issue, check service status, and route it to technical support.",
+  "General Inquiry": "Answer the question with the relevant help-center information.",
+  "Feature Request": "Record the requested improvement with its use case for product review.",
+  "Unknown": "Review the message manually and assign the right support category."
+}
+
+const spanishActionTemplates = {
+  "Billing Issue": "Revisa la factura o el pago afectado y confirma el estado de la cuenta.",
+  "Technical Problem": "Reproduce el problema, revisa el estado del servicio y asígnalo al equipo técnico.",
+  "General Inquiry": "Responde con la información pertinente del centro de ayuda.",
+  "Feature Request": "Registra la mejora solicitada y su caso de uso para que el equipo de producto la revise.",
+  "Unknown": "Revisa el mensaje manualmente y asígnale la categoría de soporte adecuada."
 }
 
 /**
@@ -17,8 +26,16 @@ const actionTemplates = {
  * @param {string} urgency - The urgency level
  * @returns {string} - Recommended next step
  */
-export function getRecommendedAction(category, urgency) {
-  return actionTemplates[category] || "No recommendation available."
+export function getRecommendedAction(category, urgency = "Low", message = "") {
+  const isSpanish = isSpanishMessage(message)
+  const templates = isSpanish ? spanishActionTemplates : actionTemplates
+  const action = templates[category] || templates.Unknown
+  if (urgency === "High") {
+    return isSpanish
+      ? `Escala el caso de inmediato al responsable de soporte de guardia. ${action}`
+      : `Escalate to the on-call support lead immediately. ${action}`
+  }
+  return action
 }
 
 /**
@@ -39,5 +56,5 @@ export function getAvailableCategories() {
  * @returns {boolean} - Whether to escalate
  */
 export function shouldEscalate(category, urgency, message) {
-  return message.length > 100
+  return urgency === "High" || category === "Unknown" || /\b(?:security breach|account compromised|data loss)\b/i.test(message)
 }

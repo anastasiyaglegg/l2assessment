@@ -1,3 +1,72 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  font-family: 'Nunito Sans', 'Avenir Next', Avenir, sans-serif;
+  color: #262344;
+  background: #f7f5ff;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  background:
+    radial-gradient(circle at 8% 12%, rgba(199, 184, 255, 0.2), transparent 26rem),
+    radial-gradient(circle at 95% 28%, rgba(255, 190, 172, 0.13), transparent 25rem),
+    #f7f5ff;
+}
+
+button,
+a,
+textarea {
+  transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease,
+    box-shadow 160ms ease, transform 160ms ease;
+}
+
+button:focus-visible,
+a:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid #ff987e;
+  outline-offset: 3px;
+}
+
+.page-shell {
+  background: transparent;
+}
+
+.surface-card {
+  border: 1px solid rgba(110, 93, 170, 0.12);
+  border-radius: 1.25rem;
+  box-shadow: 0 12px 32px rgba(49, 38, 94, 0.07);
+}
+
+.action-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 36px rgba(49, 38, 94, 0.16);
+}
+
+.hero-orbit {
+  animation: floaty 4.5s ease-in-out infinite;
+}
+
+@keyframes floaty {
+  0%, 100% { transform: translateY(0) rotate(-5deg); }
+  50% { transform: translateY(-8px) rotate(2deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -8,6 +8,11 @@ function AnalyzePage() {
   const [message, setMessage] = useState('')
   const [results, setResults] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
+  const sampleMessages = [
+    'Database connection lost',
+    'Thank you so much! Your support team was wonderful!',
+    'Could you add an export to CSV feature?'
+  ]
 
   useEffect(() => {
     // Check for example message from home page
@@ -31,11 +36,11 @@ function AnalyzePage() {
       // Run categorization (LLM call)
       const { category, reasoning } = await categorizeMessage(message)
       
-      // Calculate urgency (rule-based)
+      // Calculate urgency from customer impact before selecting the next action
       const urgency = calculateUrgency(message)
       
-      // Get recommended action (template-based)
-      const recommendedAction = getRecommendedAction(category)
+      // Route high-impact messages to a human immediately
+      const recommendedAction = getRecommendedAction(category, urgency, message)
       
       const analysisResult = {
         message,
@@ -66,12 +71,15 @@ function AnalyzePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="page-shell min-h-screen py-8 sm:py-12">
       <div className="max-w-4xl mx-auto px-4">
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Analyze Customer Message</h1>
-          <p className="text-gray-600 mb-6">
-            Paste a customer support message below to automatically categorize and prioritize.
+        <div className="surface-card mb-6 bg-white p-6 sm:p-8">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-violet-100 px-3 py-1.5 text-sm font-bold text-violet-800">
+            <span aria-hidden="true">🪄</span> Inbox triage
+          </div>
+          <h1 className="mb-2 text-3xl font-black tracking-tight text-indigo-950">Analyze a customer message</h1>
+          <p className="mb-6 text-gray-600">
+            Drop in a message and Relay will find its category, urgency, and next step.
           </p>
 
           {/* Input Section */}
@@ -83,9 +91,27 @@ function AnalyzePage() {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Paste customer message here..."
-              className="w-full border border-gray-300 rounded-lg p-3 h-40 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full resize-y rounded-2xl border border-violet-200 bg-violet-50/40 p-4 leading-relaxed text-gray-800 placeholder:text-gray-400 focus:border-violet-400 focus:ring-2 focus:ring-violet-200"
               disabled={isLoading}
             />
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <span className="mr-1 text-xs font-extrabold uppercase tracking-wider text-gray-400">Try one</span>
+              {sampleMessages.map((sample, index) => (
+                <button
+                  key={sample}
+                  type="button"
+                  onClick={() => setMessage(sample)}
+                  disabled={isLoading}
+                  className={`rounded-full border px-3 py-1.5 text-xs font-bold disabled:opacity-50 ${
+                    index === 0 ? 'border-rose-200 bg-rose-50 text-rose-800 hover:bg-rose-100' :
+                    index === 1 ? 'border-sky-200 bg-sky-50 text-sky-800 hover:bg-sky-100' :
+                    'border-violet-200 bg-violet-50 text-violet-800 hover:bg-violet-100'
+                  }`}
+                >
+                  {index === 0 ? '🚨 ' : index === 1 ? '💛 ' : '💡 '}{index === 0 ? 'Outage' : index === 1 ? 'Thank-you note' : 'Feature idea'}
+                </button>
+              ))}
+            </div>
             <div className="text-sm text-gray-500 mt-1">
               {message.length} characters
             </div>
@@ -96,10 +122,10 @@ function AnalyzePage() {
             <button
               onClick={handleAnalyze}
               disabled={isLoading}
-              className={`flex-1 py-3 rounded-lg font-semibold ${
+              className={`flex-1 rounded-xl py-3 font-extrabold shadow-sm ${
                 isLoading
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
+                  ? 'cursor-not-allowed bg-gray-200 text-gray-500'
+                  : 'bg-indigo-950 text-white hover:-translate-y-0.5 hover:bg-indigo-900'
               }`}
             >
               {isLoading ? (
@@ -117,7 +143,7 @@ function AnalyzePage() {
             <button
               onClick={handleClear}
               disabled={isLoading}
-              className="px-6 py-3 border border-gray-300 rounded-lg font-semibold text-gray-700 hover:bg-gray-50"
+              className="rounded-xl border border-gray-200 px-6 py-3 font-bold text-gray-600 hover:border-violet-200 hover:bg-violet-50"
             >
               Clear
             </button>
@@ -126,13 +152,13 @@ function AnalyzePage() {
 
         {/* Results Section */}
         {results && (
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Analysis Results</h2>
+          <div className="surface-card bg-white p-6 sm:p-8">
+            <h2 className="mb-5 text-xl font-extrabold text-indigo-950">Relay’s read <span aria-hidden="true">✨</span></h2>
             
             <div className="space-y-4">
               <div>
                 <div className="text-sm font-semibold text-gray-600 mb-1">Category</div>
-                <div className="inline-block bg-blue-100 text-blue-800 px-4 py-2 rounded-lg font-semibold">
+                <div className="inline-block rounded-xl bg-violet-100 px-4 py-2 font-extrabold text-violet-900">
                   {results.category}
                 </div>
               </div>
@@ -140,24 +166,24 @@ function AnalyzePage() {
               <div>
                 <div className="text-sm font-semibold text-gray-600 mb-1">Urgency Level</div>
                 <div className={`inline-block px-4 py-2 rounded-lg font-semibold ${
-                  results.urgency === 'High' ? 'bg-red-200 text-red-900' :
-                  results.urgency === 'Medium' ? 'bg-yellow-200 text-yellow-900' :
-                  'bg-green-200 text-green-900'
+                  results.urgency === 'High' ? 'bg-rose-100 text-rose-800 ring-1 ring-rose-200' :
+                  results.urgency === 'Medium' ? 'bg-amber-100 text-amber-900 ring-1 ring-amber-200' :
+                  'bg-sky-100 text-sky-900 ring-1 ring-sky-200'
                 }`}>
-                  {results.urgency}
+                  {results.urgency === 'High' ? '🚨 ' : results.urgency === 'Medium' ? '⏳ ' : '🌤️ '}{results.urgency}
                 </div>
               </div>
 
               <div>
                 <div className="text-sm font-semibold text-gray-600 mb-1">Recommended Action</div>
-                <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                  <p className="text-gray-800">{results.recommendedAction}</p>
+                <div className="rounded-2xl border border-orange-200 bg-orange-50 p-4">
+                  <p className="leading-relaxed text-gray-800">{results.recommendedAction}</p>
                 </div>
               </div>
 
               <div>
                 <div className="text-sm font-semibold text-gray-600 mb-1">AI Reasoning</div>
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
                   <div className="prose prose-sm max-w-none text-gray-700">
                     <ReactMarkdown>
                       {results.reasoning}
@@ -174,7 +200,7 @@ function AnalyzePage() {
                   navigator.clipboard.writeText(text)
                   alert('Results copied to clipboard!')
                 }}
-                className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 font-semibold"
+                className="rounded-xl bg-indigo-50 px-4 py-2 font-bold text-indigo-800 hover:bg-indigo-100"
               >
                 📋 Copy Results
               </button>
