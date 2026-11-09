@@ -8,6 +8,7 @@ const actionTemplates = {
   "Technical Problem": "Reproduce the issue, check service status, and route it to technical support.",
   "General Inquiry": "Answer the question with the relevant help-center information.",
   "Feature Request": "Record the requested improvement with its use case for product review.",
+  "Human Review": "Route the message to a support agent for manual review.",
   "Unknown": "Review the message manually and assign the right support category."
 }
 
@@ -16,6 +17,7 @@ const spanishActionTemplates = {
   "Technical Problem": "Reproduce el problema, revisa el estado del servicio y asígnalo al equipo técnico.",
   "General Inquiry": "Responde con la información pertinente del centro de ayuda.",
   "Feature Request": "Registra la mejora solicitada y su caso de uso para que el equipo de producto la revise.",
+  "Human Review": "Asigna el mensaje a un agente de soporte para que lo revise manualmente.",
   "Unknown": "Revisa el mensaje manualmente y asígnale la categoría de soporte adecuada."
 }
 
@@ -56,5 +58,5 @@ export function getAvailableCategories() {
  * @returns {boolean} - Whether to escalate
  */
 export function shouldEscalate(category, urgency, message) {
-  return urgency === "High" || category === "Unknown" || /\b(?:security breach|account compromised|data loss)\b/i.test(message)
+  return urgency === "High" || category === "Human Review" || category === "Unknown" || /\b(?:security breach|account compromised|data loss)\b/i.test(message)
 }

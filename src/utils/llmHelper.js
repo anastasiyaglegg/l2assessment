@@ -11,6 +11,7 @@ const categories = [
   'Technical Problem',
   'Feature Request',
   'General Inquiry',
+  'Human Review',
   'Unknown'
 ]
 
@@ -195,7 +196,7 @@ function getMockCategorization(message) {
   
   // Fallback for ambiguous messages
   return {
-    category: "General Inquiry",
+    category: "Human Review",
     reasoning: getReasoning('ambiguous')
   };
 }
